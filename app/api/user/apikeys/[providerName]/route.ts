@@ -4,20 +4,14 @@ import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/db';
 import { AIProvider } from '@/lib/ai-providers';
 
-interface DeleteRouteContext {
-  params: {
-    providerName: string;
-  };
-}
-
-export async function DELETE(request: Request, { params }: DeleteRouteContext) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ providerName: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const userId = session.user.id;
-    const { providerName } = params;
+    const { providerName } = await params;
 
     if (!providerName) {
       return NextResponse.json(
